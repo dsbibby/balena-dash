@@ -4,7 +4,7 @@ FROM balenalib/$BALENA_ARCH-debian
 ARG BALENA_ARCH=%%BALENA_ARCH%%
 
 
-RUN install_packages dnsmasq wireless-tools
+RUN install_packages dnsmasq wireless-tools wget
 
 # use latest version. If specific version is required, it should be provided as vX.Y.Z, e.g v4.11.37
 ARG VERSION="latest"
