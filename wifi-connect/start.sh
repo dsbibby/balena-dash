@@ -10,9 +10,9 @@ while [[ true ]]; do
     wget --spider --no-check-certificate $check_host > /dev/null 2>&1
 
     if [ $? -eq 0 ]; then
-        if [[ $VERBOSE != false ]]; then echo -e"Your device is already connected to the internet.\nSkipping setting up Wifi-Connect Access Point. Will check again in $freq seconds."; fi        
+        if [[ $VERBOSE != false ]]; then echo $'Your device is already connected to the internet.\nSkipping setting up Wifi-Connect Access Point. Will check again in '$freq' seconds.'; fi        
     else
-        if [[ $VERBOSE != false ]]; then echo -e"Your device is not connected to the internet. Could not reach $check_host\nStarting up Wifi-Connect.\n Connect to the Access Point and configure the SSID and Passphrase for the network to connect to."; fi        
+        if [[ $VERBOSE != false ]]; then echo $'Your device is not connected to the internet. Could not reach '$check_host'\nStarting up Wifi-Connect.\n Connect to the Access Point and configure the SSID and Passphrase for the network to connect to.'; fi        
         ./wifi-connect
     fi
 
