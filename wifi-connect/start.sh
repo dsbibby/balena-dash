@@ -1,34 +1,33 @@
-#!/bin/busybox sh
+#!/usr/bin/env bash
 
-if [[ ! -z $CHECK_CONN_FREQ ]]; then
-    freq=$CHECK_CONN_FREQ
+export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
+
+# Optional step - it takes couple of seconds (or longer) to establish a WiFi connection
+# sometimes. In this case, following checks will fail and wifi-connect
+# will be launched even if the device will be able to connect to a WiFi network.
+# If this is your case, you can wait for a while and then check for the connection.
+sleep 15
+
+# Choose a condition for running WiFi Connect according to your use case:
+
+# 1. Is there a default gateway?
+# ip route | grep default
+
+# 2. Is there Internet connectivity?
+# nmcli -t g | grep full
+
+# 3. Is there Internet connectivity via a google ping?
+wget --spider http://google.com 2>&1
+
+# 4. Is there an active WiFi connection?
+iwgetid -r
+
+if [ $? -eq 0 ]; then
+    printf 'Skipping WiFi Connect\n'
 else
-    freq=120
+    printf 'Starting WiFi Connect\n'
+    ./wifi-connect
 fi
 
-if [[ ! -z $PORTAL_CHECK_HOST ]]; then
-    check_host=$PORTAL_CHECK_HOST
-else
-    check_host="1.1.1.1"
-fi
-echo "Using check host: $check_host"
-
-sleep 5
-
-while [[ true ]]; do
-    if [[ $VERBOSE != "false" ]]; then echo "Checking internet connectivity ..."; fi
-    wget --spider --no-check-certificate "$check_host" > /dev/null 2>&1
-
-    if [ $? -eq 0 ]; then
-        if [[ $VERBOSE != "false" ]]; then echo "Your device is already connected to the internet.\nSkipping setting up Wifi-Connect Access Point. Will check again in $freq seconds."; fi        
-    else
-        if [[ $VERBOSE != "false" ]]; then echo "Your device is not connected to the internet.\nStarting up Wifi-Connect.\n Connect to the Access Point and configure the SSID and Passphrase for the network to connect to."; fi        
-        DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket /usr/src/app/wifi-connect -u /usr/src/app/ui
-    fi
-
-    sleep $freq
-
-done
-
-
-/bin/busybox sh /usr/bin/balena-idle
+# Start your application here.
+sleep infinity
