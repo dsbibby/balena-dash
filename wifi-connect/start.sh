@@ -1,19 +1,23 @@
 #!/bin/busybox sh
 
-if [[ ! -z $CHECK_CONN_FREQ ]] 
-    then
-        freq=$CHECK_CONN_FREQ
-    else
-        freq=120
+if [[ ! -z $CHECK_CONN_FREQ ]]; then
+    freq=$CHECK_CONN_FREQ
+else
+    freq=120
 fi
 
-CHECK_ADDR=${PORTAL_CHECK_HOST:-1.1.1.1}
+if [[ ! -z $PORTAL_CHECK_HOST ]]; then
+    check_host=$PORTAL_CHECK_HOST
+else
+    check_host="1.1.1.1"
+fi
+echo "Using check host: $check_host"
 
 sleep 5
 
 while [[ true ]]; do
     if [[ $VERBOSE != false ]]; then echo "Checking internet connectivity ..."; fi
-    wget --spider --no-check-certificate "${CHECK_ADDR}" > /dev/null 2>&1
+    wget --spider --no-check-certificate "$check_host" > /dev/null 2>&1
 
     if [ $? -eq 0 ]; then
         if [[ $VERBOSE != false ]]; then echo "Your device is already connected to the internet.\nSkipping setting up Wifi-Connect Access Point. Will check again in $freq seconds."; fi        
