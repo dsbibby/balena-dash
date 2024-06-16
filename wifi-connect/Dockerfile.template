@@ -1,6 +1,7 @@
 FROM balenalib/%%BALENA_ARCH%%-python as builder
 
 RUN install_packages dnsmasq wireless-tools git rsync binutils busybox-static
+ARG BALENA_ARCH=%%BALENA_ARCH%%
 
 WORKDIR /usr/src/app
 
