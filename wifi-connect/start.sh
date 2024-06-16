@@ -1,33 +1,21 @@
 #!/usr/bin/env bash
 
-export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
+freq=${CHECK_CONN_FREQ:-120}
+check_host="${CHECK_HOST:-1.1.1.1}"
 
-# Optional step - it takes couple of seconds (or longer) to establish a WiFi connection
-# sometimes. In this case, following checks will fail and wifi-connect
-# will be launched even if the device will be able to connect to a WiFi network.
-# If this is your case, you can wait for a while and then check for the connection.
 sleep 15
 
-# Choose a condition for running WiFi Connect according to your use case:
+while [[ true ]]; do
+    if [[ $VERBOSE != false ]]; then echo "Checking internet connectivity ..."; fi
+    wget --spider --no-check-certificate $check_host > /dev/null 2>&1
 
-# 1. Is there a default gateway?
-# ip route | grep default
+    if [ $? -eq 0 ]; then
+        if [[ $VERBOSE != false ]]; then echo -e"Your device is already connected to the internet.\nSkipping setting up Wifi-Connect Access Point. Will check again in $freq seconds."; fi        
+    else
+        if [[ $VERBOSE != false ]]; then echo -e"Your device is not connected to the internet. Could not reach $check_host\nStarting up Wifi-Connect.\n Connect to the Access Point and configure the SSID and Passphrase for the network to connect to."; fi        
+        ./wifi-connect
+    fi
 
-# 2. Is there Internet connectivity?
-# nmcli -t g | grep full
+    sleep $freq
 
-# 3. Is there Internet connectivity via a google ping?
-wget --spider http://google.com 2>&1
-
-# 4. Is there an active WiFi connection?
-# iwgetid -r
-
-if [ $? -eq 0 ]; then
-    printf 'Skipping WiFi Connect\n'
-else
-    printf 'Starting WiFi Connect\n'
-    ./wifi-connect
-fi
-
-# Start your application here.
-sleep infinity
+done
